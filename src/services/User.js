@@ -1,7 +1,8 @@
 import User from "../models/User.js";
 
-export const verifyIfUserExists = async (email) => {
-  if (await User.findOne({ email })) return true;
+export const getUserByEmail = async (email) => {
+  const user = await User.findOne({ email });
+  if (user) return user;
 };
 
 export const createUser = async (user) => {
