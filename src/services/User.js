@@ -9,3 +9,8 @@ export const createUser = async (user) => {
   const newUser = await User.create(user);
   return newUser;
 };
+
+export const getAllUsers = async () => {
+  const users = await User.find();
+  return users;
+};
