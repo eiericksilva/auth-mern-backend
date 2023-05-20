@@ -38,13 +38,13 @@ router.post("/login", async (req, res) => {
     const user = await getFullUserByEmail(email);
 
     if (!user) {
-      return res.status(400).json("User not found by email");
+      return res.status(400).json("Email or password do not match");
     }
 
     const passwordIsEqual = await bcryptjs.compare(password, user.password);
 
     if (!passwordIsEqual) {
-      return res.status(400).json("Password not found");
+      return res.status(400).json("Email or password do not match");
     }
 
     const token = await generateToken(user.id);
