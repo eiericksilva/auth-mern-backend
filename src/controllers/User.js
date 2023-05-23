@@ -24,7 +24,7 @@ router.post("/register", async (req, res) => {
 
   try {
     const user = await createUser(req.body);
-    const token = await generateToken(user.id, username, email);
+    const token = await generateToken(user.id);
     res.status(201).json({ message: "user created successfully", user, token });
   } catch (error) {
     res.status(500).json(error);
@@ -47,7 +47,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json("Email or password do not match");
     }
 
-    const token = await generateToken(user.id, user.username, user.email);
+    const token = await generateToken(user.id);
 
     res.status(200).json({ message: "User is authenticated", user, token });
   } catch (error) {
