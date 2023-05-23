@@ -5,8 +5,13 @@ export const createNews = async (body) => {
   return news;
 };
 
-export const findAllNews = async (id, payload) => {
-  const news = [];
-  const user = await News.find();
-  return user;
+export const findAllNews = async (offset, limit) => {
+  const news = await News.find()
+    .sort({ _id: -1 })
+    .skip(offset)
+    .limit(limit)
+    .populate("user");
+  return news;
 };
+
+export const countNews = async () => News.countDocuments();

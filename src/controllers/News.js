@@ -2,11 +2,10 @@ import { Router } from "express";
 const router = Router();
 
 //importe as funções do Services
-import { findAllNews, createNews } from "../services/News.js";
+import { findAllNews, createNews, countNews } from "../services/News.js";
 
 router.post("/", async (req, res) => {
   const currentUser = req.currentUser;
-  console.log("req.currentUser from Controller:", req.currentUser);
 
   try {
     const { title, text, banner } = req.body;
@@ -29,9 +28,41 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
+  let { limit, offset } = req.query;
+
+  limit = Number(limit) || 5;
+  offset = Number(offset) || 0;
+
+  const totalNews = await countNews();
+  const currentUrl = req.baseUrl;
+
+  const next = offset + limit;
+  const prev = offset - limit;
+
+  const nextUrl =
+    next < totalNews ? `${currentUrl}?limit=${limit}&offset=${next}` : null;
+
+  const prevUrl =
+    prev < totalNews ? `${currentUrl}?limit=${limit}&offset=${prev}` : null;
+
   try {
-    const news = await findAllNews();
-    res.status(200).json(news);
+    const news = await findAllNews(offset, limit);
+    res.status(200).json({
+      nextUrl,
+      prevUrl,
+      limit,
+      offset,
+      totalNews,
+      results: news.map((item) => ({
+        id: item._id,
+        title: item.title,
+        text: item.text,
+        banner: item.banner,
+        likes: item.likes,
+        comments: item.comments,
+        username: item.user.username,
+      })),
+    });
   } catch (error) {
     res.status(400).json(error);
   }
