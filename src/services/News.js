@@ -20,3 +20,5 @@ export const topNews = async () => {
 };
 
 export const countNews = async () => News.countDocuments();
+
+export const findNewsById = async (id) => News.findById(id).populate("user");

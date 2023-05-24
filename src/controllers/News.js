@@ -7,6 +7,7 @@ import {
   createNews,
   countNews,
   topNews,
+  findNewsById,
 } from "../services/News.js";
 
 router.post("/", async (req, res) => {
@@ -94,6 +95,30 @@ router.get("/topnews", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const news = await findNewsById(id);
+
+    if (!news) {
+      res.status(400).json({ message: "There is no News with this id" });
+    }
+    return res.status(200).json({
+      news: {
+        id: news._id,
+        title: news.title,
+        text: news.text,
+        banner: news.banner,
+        likes: news.likes,
+        comments: news.comments,
+        username: news.user.username,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
