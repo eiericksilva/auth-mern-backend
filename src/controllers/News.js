@@ -10,6 +10,7 @@ import {
   topNews,
   findNewsById,
   searchNewsByTitle,
+  newsByUser,
 } from "../services/News.js";
 
 router.post("/", authenticateMiddleware, async (req, res) => {
@@ -124,6 +125,27 @@ router.get("/search", async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/newsbyuser", authenticateMiddleware, async (req, res) => {
+  try {
+    const { id } = req.currentUser;
+    const news = await newsByUser(id);
+
+    return res.status(200).json({
+      results: news.map((item) => ({
+        id: item._id,
+        title: item.title,
+        text: item.text,
+        banner: item.banner,
+        likes: item.likes,
+        comments: item.comments,
+        username: item.user.username,
+      })),
+    });
+  } catch (error) {
+    return res.status(200).json({ message: error.message });
   }
 });
 

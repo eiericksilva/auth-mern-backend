@@ -12,8 +12,8 @@ export const countNews = async () => News.countDocuments();
 
 export const findNewsById = async (id) => News.findById(id).populate("user");
 
-export const searchNewsByTitle = async (title) =>
-  News.find({
+export const searchNewsByTitle = async (title) => {
+  return News.find({
     title: {
       $regex: `${title || ""}`,
       $options: "i",
@@ -21,3 +21,7 @@ export const searchNewsByTitle = async (title) =>
   })
     .sort({ _id: -1 })
     .populate("user");
+};
+
+export const newsByUser = async (id) =>
+  News.find({ user: id }).sort({ _id: -1 }).populate("user");
