@@ -14,4 +14,9 @@ export const findAllNews = async (offset, limit) => {
   return news;
 };
 
+export const topNews = async () => {
+  const topNews = News.findOne().sort({ _id: -1 }).populate("user");
+  return topNews;
+};
+
 export const countNews = async () => News.countDocuments();

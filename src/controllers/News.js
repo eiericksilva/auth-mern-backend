@@ -2,7 +2,12 @@ import { Router } from "express";
 const router = Router();
 
 //importe as funções do Services
-import { findAllNews, createNews, countNews } from "../services/News.js";
+import {
+  findAllNews,
+  createNews,
+  countNews,
+  topNews,
+} from "../services/News.js";
 
 router.post("/", async (req, res) => {
   const currentUser = req.currentUser;
@@ -65,6 +70,30 @@ router.get("/", async (req, res) => {
     });
   } catch (error) {
     res.status(400).json(error);
+  }
+});
+
+router.get("/topnews", async (req, res) => {
+  try {
+    const news = await topNews();
+
+    if (!news) {
+      return res.status(400).send({ message: "There is no registered post" });
+    }
+
+    res.status(200).send({
+      news: {
+        id: news._id,
+        title: news.title,
+        text: news.text,
+        banner: news.banner,
+        likes: news.likes,
+        comments: news.comments,
+        username: news.user.username,
+      },
+    });
+  } catch (error) {
+    console.log(error);
   }
 });
 
