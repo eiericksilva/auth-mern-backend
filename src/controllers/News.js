@@ -254,4 +254,27 @@ router.patch("/comment/:postId", authenticateMiddleware, async (req, res) => {
   } catch (error) {}
 });
 
+router.patch(
+  "/comment/:postId/:commentId",
+  authenticateMiddleware,
+  async (req, res) => {
+    try {
+      const { postId, commentId } = req.params;
+      const userId = req.currentUser.id;
+
+      const commentDeleted = await deleteComment(postId, commentId, userId);
+
+      const commentFinder = commentDeleted.comments.find(
+        (comment) => comment.commentId === commentId
+      );
+      if (commentFinder.userId !== userId) {
+        return res
+          .status(400)
+          .json({ message: "You can't delete this comment" });
+      }
+      return res.status(201).json({ message: "Comment successfully removed" });
+    } catch (error) {}
+  }
+);
+
 export default router;
