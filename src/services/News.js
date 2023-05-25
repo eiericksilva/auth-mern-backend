@@ -38,3 +38,15 @@ export const likeNews = async (postId, userId) =>
 
 export const unlikeNews = async (postId, userId) =>
   News.findOneAndUpdate({ _id: postId }, { $pull: { likes: { userId } } });
+
+export const commentNews = async (postId, comment, userId) => {
+  const idComment = Math.floor(Date.now() * Math.random()).toString(36);
+  return News.findOneAndUpdate(
+    { _id: postId },
+    {
+      $push: {
+        comments: { idComment, userId, comment, createdAt: new Date() },
+      },
+    }
+  );
+};

@@ -15,6 +15,8 @@ import {
   deleteNews,
   likeNews,
   unlikeNews,
+  commentNews,
+  deleteComment,
 } from "../services/News.js";
 
 router.post("/", authenticateMiddleware, async (req, res) => {
@@ -222,11 +224,11 @@ router.delete("/:id", authenticateMiddleware, async (req, res) => {
 router.patch("/like/:postId", authenticateMiddleware, async (req, res) => {
   try {
     const { postId } = req.params;
-    const { id } = req.currentUser;
+    const userId = req.currentUser.id;
 
-    const newsLiked = await likeNews(postId, id);
+    const newsLiked = await likeNews(postId, userId);
     if (!newsLiked) {
-      await unlikeNews(postId, id);
+      await unlikeNews(postId, userId);
       return res.status(200).json({ message: "Post unliked" });
     }
 
@@ -234,6 +236,22 @@ router.patch("/like/:postId", authenticateMiddleware, async (req, res) => {
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
+});
+
+router.patch("/comment/:postId", authenticateMiddleware, async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { comment } = req.body;
+    const userId = req.currentUser.id;
+
+    if (!comment) {
+      return res.status(400).json({ message: "Write a message to comment" });
+    }
+
+    await commentNews(postId, comment, userId);
+
+    return res.status(201).json({ message: "Comment successfully created" });
+  } catch (error) {}
 });
 
 export default router;
