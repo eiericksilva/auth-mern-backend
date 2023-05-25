@@ -12,6 +12,7 @@ import {
   searchNewsByTitle,
   newsByUser,
   updateNews,
+  deleteNews,
 } from "../services/News.js";
 
 router.post("/", authenticateMiddleware, async (req, res) => {
@@ -199,4 +200,20 @@ router.patch("/:id", authenticateMiddleware, async (req, res) => {
   }
 });
 
+router.delete("/:id", authenticateMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const news = await findNewsById(id);
+
+    if (news.user._id != req.currentUser.id) {
+      res.status(400).json({ message: "You didn't update this post" });
+    }
+
+    await deleteNews(id);
+    return res.json({ message: "post successfully deleted!" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
 export default router;

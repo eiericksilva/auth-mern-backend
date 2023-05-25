@@ -27,3 +27,5 @@ export const newsByUser = async (id) =>
 
 export const updateNews = async (id, title, text, banner) =>
   News.findOneAndUpdate({ _id: id }, { title, text, banner });
+
+export const deleteNews = async (id) => News.findOneAndDelete({ _id: id });
