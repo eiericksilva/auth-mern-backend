@@ -29,3 +29,12 @@ export const updateNews = async (id, title, text, banner) =>
   News.findOneAndUpdate({ _id: id }, { title, text, banner });
 
 export const deleteNews = async (id) => News.findOneAndDelete({ _id: id });
+
+export const likeNews = async (postId, userId) =>
+  News.findOneAndUpdate(
+    { _id: postId, "likes.userId": { $nin: [userId] } },
+    { $push: { likes: { userId, created: new Date() } } }
+  );
+
+export const unlikeNews = async (postId, userId) =>
+  News.findOneAndUpdate({ _id: postId }, { $pull: { likes: { userId } } });

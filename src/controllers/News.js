@@ -13,6 +13,8 @@ import {
   newsByUser,
   updateNews,
   deleteNews,
+  likeNews,
+  unlikeNews,
 } from "../services/News.js";
 
 router.post("/", authenticateMiddleware, async (req, res) => {
@@ -216,4 +218,22 @@ router.delete("/:id", authenticateMiddleware, async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 });
+
+router.patch("/like/:postId", authenticateMiddleware, async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { id } = req.currentUser;
+
+    const newsLiked = await likeNews(postId, id);
+    if (!newsLiked) {
+      await unlikeNews(postId, id);
+      return res.status(200).json({ message: "Post unliked" });
+    }
+
+    return res.json({ message: "Post liked" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
+
 export default router;
