@@ -11,6 +11,7 @@ import {
   findNewsById,
   searchNewsByTitle,
   newsByUser,
+  updateNews,
 } from "../services/News.js";
 
 router.post("/", authenticateMiddleware, async (req, res) => {
@@ -170,6 +171,31 @@ router.get("/:id", authenticateMiddleware, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.patch("/:id", authenticateMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, text, banner } = req.body;
+    console.log("entrou no try");
+
+    if (!title && !text && !banner) {
+      res
+        .status(400)
+        .json({ message: "Submit at least one field to update the post" });
+    }
+
+    const news = await findNewsById(id);
+
+    if (news.user._id != req.currentUser.id) {
+      res.status(400).json({ message: "You didn't update this post" });
+    }
+
+    await updateNews(id, title, text, banner);
+    return res.json({ message: "post successfully updated!" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
   }
 });
 
