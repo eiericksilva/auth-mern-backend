@@ -8,12 +8,13 @@ const app = express();
 connectDB();
 
 import NewsController from "./controllers/News.js";
+import NewsRouter from "./routes/News.js";
 
 app.use(express.json());
 app.use(cors());
 
 app.use("/user", UserRouter);
-app.use("/news", NewsController);
+app.use("/news", NewsRouter);
 
 app.listen(3001, () => {
   console.log(`server is running`);

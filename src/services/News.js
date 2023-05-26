@@ -1,18 +1,19 @@
 import News from "../models/News.js";
 
-export const createNews = async (body) => News.create(body);
+export const createNewsService = async (body) => News.create(body);
 
-export const findAllNews = async (offset, limit) =>
+export const findAllNewsService = async (offset, limit) =>
   News.find().sort({ _id: -1 }).skip(offset).limit(limit).populate("user");
 
-export const topNews = async () =>
+export const topNewsService = async () =>
   News.findOne().sort({ _id: -1 }).populate("user");
 
-export const countNews = async () => News.countDocuments();
+export const countNewsService = async () => News.countDocuments();
 
-export const findNewsById = async (id) => News.findById(id).populate("user");
+export const findNewsByIdService = async (id) =>
+  News.findById(id).populate("user");
 
-export const searchNewsByTitle = async (title) =>
+export const searchNewsByTitleService = async (title) =>
   News.find({
     title: {
       $regex: `${title || ""}`,
@@ -22,24 +23,25 @@ export const searchNewsByTitle = async (title) =>
     .sort({ _id: -1 })
     .populate("user");
 
-export const newsByUser = async (id) =>
+export const newsByUserService = async (id) =>
   News.find({ user: id }).sort({ _id: -1 }).populate("user");
 
-export const updateNews = async (id, title, text, banner) =>
+export const updateNewsService = async (id, title, text, banner) =>
   News.findOneAndUpdate({ _id: id }, { title, text, banner });
 
-export const deleteNews = async (id) => News.findOneAndDelete({ _id: id });
+export const deleteNewsService = async (postId) =>
+  News.findOneAndDelete({ _id: postId });
 
-export const likeNews = async (postId, userId) =>
+export const likeNewsService = async (postId, userId) =>
   News.findOneAndUpdate(
     { _id: postId, "likes.userId": { $nin: [userId] } },
     { $push: { likes: { userId, created: new Date() } } }
   );
 
-export const unlikeNews = async (postId, userId) =>
+export const unlikeNewsService = async (postId, userId) =>
   News.findOneAndUpdate({ _id: postId }, { $pull: { likes: { userId } } });
 
-export const commentNews = async (postId, comment, userId) => {
+export const commentNewsService = async (postId, comment, userId) => {
   const commentId = Math.floor(Date.now() * Math.random()).toString(36);
   return News.findOneAndUpdate(
     { _id: postId },
@@ -51,7 +53,7 @@ export const commentNews = async (postId, comment, userId) => {
   );
 };
 
-export const deleteComment = async (postId, commentId, userId) => {
+export const deleteCommentService = async (postId, commentId, userId) => {
   return News.findOneAndUpdate(
     { _id: postId },
     {

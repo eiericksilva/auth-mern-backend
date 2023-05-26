@@ -1,25 +1,23 @@
 import { Router } from "express";
 const router = Router();
-import authenticateMiddleware from "../middlewares/authenticate.js";
 
-//importe as funções do Services
 import {
-  findAllNews,
-  createNews,
-  countNews,
-  topNews,
-  findNewsById,
-  searchNewsByTitle,
-  newsByUser,
-  updateNews,
-  deleteNews,
-  likeNews,
-  unlikeNews,
-  commentNews,
-  deleteComment,
+  findAllNewsService,
+  createNewsService,
+  countNewsService,
+  topNewsService,
+  findNewsByIdService,
+  searchNewsByTitleService,
+  newsByUserService,
+  updateNewsService,
+  deleteNewsService,
+  likeNewsService,
+  unlikeNewsService,
+  commentNewsService,
+  deleteCommentService,
 } from "../services/News.js";
 
-router.post("/", authenticateMiddleware, async (req, res) => {
+const createNews = async (req, res) => {
   const currentUser = req.currentUser;
 
   try {
@@ -29,7 +27,7 @@ router.post("/", authenticateMiddleware, async (req, res) => {
       res.status(400).json({ message: "submit all fields for registration" });
     }
 
-    const news = await createNews({
+    const news = await createNewsService({
       user: currentUser.id,
       title,
       text,
@@ -40,15 +38,15 @@ router.post("/", authenticateMiddleware, async (req, res) => {
   } catch (error) {
     res.status(400).json(error);
   }
-});
+};
 
-router.get("/", async (req, res) => {
+const findAllNews = async (req, res) => {
   let { limit, offset } = req.query;
 
   limit = Number(limit) || 5;
   offset = Number(offset) || 0;
 
-  const totalNews = await countNews();
+  const totalNews = await countNewsService();
   const currentUrl = req.baseUrl;
 
   const next = offset + limit;
@@ -61,7 +59,7 @@ router.get("/", async (req, res) => {
     prev < totalNews ? `${currentUrl}?limit=${limit}&offset=${prev}` : null;
 
   try {
-    const news = await findAllNews(offset, limit);
+    const news = await findAllNewsService(offset, limit);
     res.status(200).json({
       nextUrl,
       prevUrl,
@@ -81,11 +79,11 @@ router.get("/", async (req, res) => {
   } catch (error) {
     res.status(400).json(error);
   }
-});
+};
 
-router.get("/topnews", async (req, res) => {
+const getTopNews = async (req, res) => {
   try {
-    const news = await topNews();
+    const news = await topNewsService();
 
     if (!news) {
       return res.status(400).send({ message: "There is no registered post" });
@@ -105,13 +103,13 @@ router.get("/topnews", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
-});
+};
 
-router.get("/search", async (req, res) => {
+const searchNewsByTitle = async (req, res) => {
   try {
     const { title } = req.query;
 
-    const news = await searchNewsByTitle(title);
+    const news = await searchNewsByTitleService(title);
 
     if (news.length === 0) {
       return res
@@ -132,12 +130,12 @@ router.get("/search", async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-});
+};
 
-router.get("/newsbyuser", authenticateMiddleware, async (req, res) => {
+const getNewsByUser = async (req, res) => {
   try {
     const { id } = req.currentUser;
-    const news = await newsByUser(id);
+    const news = await newsByUserService(id);
 
     return res.status(200).json({
       results: news.map((item) => ({
@@ -153,12 +151,12 @@ router.get("/newsbyuser", authenticateMiddleware, async (req, res) => {
   } catch (error) {
     return res.status(200).json({ message: error.message });
   }
-});
+};
 
-router.get("/:id", authenticateMiddleware, async (req, res) => {
+const findNewsById = async (req, res) => {
   try {
     const { id } = req.params;
-    const news = await findNewsById(id);
+    const news = await findNewsByIdService(id);
 
     if (!news) {
       res.status(400).json({ message: "There is no News with this id" });
@@ -177,13 +175,12 @@ router.get("/:id", authenticateMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-router.patch("/:id", authenticateMiddleware, async (req, res) => {
+const updateNewsById = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, text, banner } = req.body;
-    console.log("entrou no try");
 
     if (!title && !text && !banner) {
       res
@@ -191,44 +188,43 @@ router.patch("/:id", authenticateMiddleware, async (req, res) => {
         .json({ message: "Submit at least one field to update the post" });
     }
 
-    const news = await findNewsById(id);
+    const news = await findNewsByIdService(id);
 
     if (news.user._id != req.currentUser.id) {
       res.status(400).json({ message: "You didn't update this post" });
     }
 
-    await updateNews(id, title, text, banner);
+    await updateNewsService(id, title, text, banner);
     return res.json({ message: "post successfully updated!" });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
-});
+};
 
-router.delete("/:id", authenticateMiddleware, async (req, res) => {
+const deleteNews = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const news = await findNewsById(id);
+    const postId = req.params.id;
+    const news = await findNewsByIdService(postId);
 
     if (news.user._id != req.currentUser.id) {
       res.status(400).json({ message: "You didn't update this post" });
     }
 
-    await deleteNews(id);
+    await deleteNewsService(postId);
     return res.json({ message: "post successfully deleted!" });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
-});
+};
 
-router.patch("/like/:postId", authenticateMiddleware, async (req, res) => {
+const likeNews = async (req, res) => {
   try {
     const { postId } = req.params;
     const userId = req.currentUser.id;
 
-    const newsLiked = await likeNews(postId, userId);
+    const newsLiked = await likeNewsService(postId, userId);
     if (!newsLiked) {
-      await unlikeNews(postId, userId);
+      await unlikeNewsService(postId, userId);
       return res.status(200).json({ message: "Post unliked" });
     }
 
@@ -236,9 +232,9 @@ router.patch("/like/:postId", authenticateMiddleware, async (req, res) => {
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
-});
+};
 
-router.patch("/comment/:postId", authenticateMiddleware, async (req, res) => {
+const commentNews = async (req, res) => {
   try {
     const { postId } = req.params;
     const { comment } = req.body;
@@ -248,33 +244,43 @@ router.patch("/comment/:postId", authenticateMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Write a message to comment" });
     }
 
-    await commentNews(postId, comment, userId);
+    await commentNewsService(postId, comment, userId);
 
     return res.status(201).json({ message: "Comment successfully created" });
   } catch (error) {}
-});
+};
 
-router.patch(
-  "/comment/:postId/:commentId",
-  authenticateMiddleware,
-  async (req, res) => {
-    try {
-      const { postId, commentId } = req.params;
-      const userId = req.currentUser.id;
+const deleteComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+    const userId = req.currentUser.id;
 
-      const commentDeleted = await deleteComment(postId, commentId, userId);
+    const commentDeleted = await deleteCommentService(
+      postId,
+      commentId,
+      userId
+    );
 
-      const commentFinder = commentDeleted.comments.find(
-        (comment) => comment.commentId === commentId
-      );
-      if (commentFinder.userId !== userId) {
-        return res
-          .status(400)
-          .json({ message: "You can't delete this comment" });
-      }
-      return res.status(201).json({ message: "Comment successfully removed" });
-    } catch (error) {}
-  }
-);
+    const commentFinder = commentDeleted.comments.find(
+      (comment) => comment.commentId === commentId
+    );
+    if (commentFinder.userId !== userId) {
+      return res.status(400).json({ message: "You can't delete this comment" });
+    }
+    return res.status(201).json({ message: "Comment successfully removed" });
+  } catch (error) {}
+};
 
-export default router;
+export default {
+  createNews,
+  findAllNews,
+  getTopNews,
+  searchNewsByTitle,
+  getNewsByUser,
+  findNewsById,
+  updateNewsById,
+  deleteNews,
+  likeNews,
+  commentNews,
+  deleteComment,
+};
