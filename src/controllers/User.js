@@ -1,4 +1,3 @@
-import { Router } from "express";
 import {
   createUser,
   getUserByEmail,
@@ -8,9 +7,7 @@ import {
 import generateToken from "../helpers/generateToken.js";
 import bcryptjs from "bcryptjs";
 
-const router = Router();
-
-router.post("/register", async (req, res) => {
+const register = async (req, res) => {
   const { username, email, password } = req.body;
   const userExists = getUserByEmail(email);
 
@@ -29,9 +26,9 @@ router.post("/register", async (req, res) => {
   } catch (error) {
     res.status(500).json(error);
   }
-});
+};
 
-router.post("/login", async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -41,7 +38,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json("Email or password do not match");
     }
 
-    const passwordIsEqual = await bcryptjs.compare(password, user.password);
+    const passwordIsEqual = bcryptjs.compare(password, user.password);
 
     if (!passwordIsEqual) {
       return res.status(400).json("Email or password do not match");
@@ -53,15 +50,15 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     res.status(400).json("error.message");
   }
-});
+};
 
-router.get("/", async (req, res) => {
+const getAll = async (req, res) => {
   try {
     const users = await getAllUsers();
     return res.status(200).json(users);
   } catch (error) {
     return res.status(400).json(error.message);
   }
-});
+};
 
-export default router;
+export default { register, login, getAll };
