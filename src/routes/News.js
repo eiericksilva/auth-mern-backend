@@ -7,18 +7,22 @@ import authenticateMiddleware from "../middlewares/authenticate.js";
 NewsRouter.post("/", authenticateMiddleware, newsController.createNews);
 
 NewsRouter.get("/", newsController.findAllNews);
-NewsRouter.get("/topnews", newsController.getTopNews);
+NewsRouter.get("/top", newsController.getTopNews);
 NewsRouter.get("/search", newsController.searchNewsByTitle);
 NewsRouter.get(
   "/newsbyuser",
   authenticateMiddleware,
   newsController.getNewsByUser
 );
-NewsRouter.get("/:id", authenticateMiddleware, newsController.findNewsById);
+NewsRouter.get("/:postId", authenticateMiddleware, newsController.findNewsById);
 
-NewsRouter.patch("/:id", authenticateMiddleware, newsController.updateNewsById);
+NewsRouter.patch("/:postId", authenticateMiddleware, newsController.updateNews);
 
-NewsRouter.delete("/:id", authenticateMiddleware, newsController.deleteNews);
+NewsRouter.delete(
+  "/:postId",
+  authenticateMiddleware,
+  newsController.deleteNews
+);
 
 NewsRouter.patch(
   "/like/:postId",

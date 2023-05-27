@@ -10,8 +10,8 @@ export const topNewsService = async () =>
 
 export const countNewsService = async () => News.countDocuments();
 
-export const findNewsByIdService = async (id) =>
-  News.findById(id).populate("user");
+export const findNewsByIdService = async (postId) =>
+  News.findById(postId).populate("user");
 
 export const searchNewsByTitleService = async (title) =>
   News.find({
@@ -23,11 +23,11 @@ export const searchNewsByTitleService = async (title) =>
     .sort({ _id: -1 })
     .populate("user");
 
-export const newsByUserService = async (id) =>
-  News.find({ user: id }).sort({ _id: -1 }).populate("user");
+export const newsByUserService = async (userId) =>
+  News.find({ user: userId }).sort({ _id: -1 }).populate("user");
 
-export const updateNewsService = async (id, title, text, banner) =>
-  News.findOneAndUpdate({ _id: id }, { title, text, banner });
+export const updateNewsService = async (postId, title, text, banner) =>
+  News.findOneAndUpdate({ _id: postId }, { title, text, banner });
 
 export const deleteNewsService = async (postId) =>
   News.findOneAndDelete({ _id: postId });

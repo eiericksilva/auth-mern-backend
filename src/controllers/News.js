@@ -18,7 +18,7 @@ import {
 } from "../services/News.js";
 
 const createNews = async (req, res) => {
-  const currentUser = req.currentUser;
+  const userId = req.currentUser.id;
 
   try {
     const { title, text, banner } = req.body;
@@ -28,7 +28,7 @@ const createNews = async (req, res) => {
     }
 
     const news = await createNewsService({
-      user: currentUser.id,
+      user: userId,
       title,
       text,
       banner,
@@ -83,15 +83,39 @@ const findAllNews = async (req, res) => {
 
 const getTopNews = async (req, res) => {
   try {
-    const news = await topNewsService();
+    const topNews = await topNewsService();
 
-    if (!news) {
+    if (!topNews) {
       return res.status(400).send({ message: "There is no registered post" });
     }
 
-    res.status(200).send({
+    res.status(200).json({
+      topNews: {
+        postId: topNews._id,
+        title: topNews.title,
+        text: topNews.text,
+        banner: topNews.banner,
+        likes: topNews.likes,
+        comments: topNews.comments,
+        username: topNews.user.username,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const findNewsById = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const news = await findNewsByIdService(postId);
+
+    if (!news) {
+      res.status(400).json({ message: "There is no News with this id" });
+    }
+    return res.status(200).json({
       news: {
-        id: news._id,
+        postId: news._id,
         title: news.title,
         text: news.text,
         banner: news.banner,
@@ -101,7 +125,7 @@ const getTopNews = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -118,7 +142,7 @@ const searchNewsByTitle = async (req, res) => {
     }
     return res.status(200).json({
       results: news.map((item) => ({
-        id: item._id,
+        postId: item._id,
         title: item.title,
         text: item.text,
         banner: item.banner,
@@ -134,12 +158,12 @@ const searchNewsByTitle = async (req, res) => {
 
 const getNewsByUser = async (req, res) => {
   try {
-    const { id } = req.currentUser;
-    const news = await newsByUserService(id);
+    const userId = req.currentUser.id;
+    const news = await newsByUserService(userId);
 
     return res.status(200).json({
       results: news.map((item) => ({
-        id: item._id,
+        postId: item._id,
         title: item.title,
         text: item.text,
         banner: item.banner,
@@ -153,33 +177,9 @@ const getNewsByUser = async (req, res) => {
   }
 };
 
-const findNewsById = async (req, res) => {
+const updateNews = async (req, res) => {
   try {
-    const { id } = req.params;
-    const news = await findNewsByIdService(id);
-
-    if (!news) {
-      res.status(400).json({ message: "There is no News with this id" });
-    }
-    return res.status(200).json({
-      news: {
-        id: news._id,
-        title: news.title,
-        text: news.text,
-        banner: news.banner,
-        likes: news.likes,
-        comments: news.comments,
-        username: news.user.username,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const updateNewsById = async (req, res) => {
-  try {
-    const { id } = req.params;
+    const { postId } = req.params;
     const { title, text, banner } = req.body;
 
     if (!title && !text && !banner) {
@@ -188,13 +188,13 @@ const updateNewsById = async (req, res) => {
         .json({ message: "Submit at least one field to update the post" });
     }
 
-    const news = await findNewsByIdService(id);
+    const news = await findNewsByIdService(postId);
 
     if (news.user._id != req.currentUser.id) {
       res.status(400).json({ message: "You didn't update this post" });
     }
 
-    await updateNewsService(id, title, text, banner);
+    await updateNewsService(postId, title, text, banner);
     return res.json({ message: "post successfully updated!" });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -203,11 +203,18 @@ const updateNewsById = async (req, res) => {
 
 const deleteNews = async (req, res) => {
   try {
-    const postId = req.params.id;
+    const { postId } = req.params;
+    const currentUserId = req.currentUser.id;
     const news = await findNewsByIdService(postId);
 
-    if (news.user._id != req.currentUser.id) {
-      res.status(400).json({ message: "You didn't update this post" });
+    if (!news) {
+      return res.status(400).json({ message: "Post not found" });
+    }
+
+    const postUserId = news.user._id;
+
+    if (postUserId != currentUserId) {
+      res.status(401).json({ message: "You didn't update this post" });
     }
 
     await deleteNewsService(postId);
@@ -247,7 +254,9 @@ const commentNews = async (req, res) => {
     await commentNewsService(postId, comment, userId);
 
     return res.status(201).json({ message: "Comment successfully created" });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
 };
 
 const deleteComment = async (req, res) => {
@@ -278,7 +287,7 @@ export default {
   searchNewsByTitle,
   getNewsByUser,
   findNewsById,
-  updateNewsById,
+  updateNews,
   deleteNews,
   likeNews,
   commentNews,
