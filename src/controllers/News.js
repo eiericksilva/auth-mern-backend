@@ -90,15 +90,13 @@ const getTopNews = async (req, res) => {
     }
 
     res.status(200).json({
-      topNews: {
-        postId: topNews._id,
-        title: topNews.title,
-        text: topNews.text,
-        banner: topNews.banner,
-        likes: topNews.likes,
-        comments: topNews.comments,
-        username: topNews.user.username,
-      },
+      postId: topNews._id,
+      title: topNews.title,
+      text: topNews.text,
+      banner: topNews.banner,
+      likes: topNews.likes,
+      comments: topNews.comments,
+      username: topNews.user.username,
     });
   } catch (error) {
     console.log(error);
