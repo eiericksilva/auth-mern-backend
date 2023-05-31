@@ -24,7 +24,9 @@ const createNews = async (req, res) => {
     const { title, text, banner } = req.body;
 
     if (!title || !text || !banner) {
-      res.status(400).json({ message: "submit all fields for registration" });
+      return res
+        .status(400)
+        .json({ message: "submit all fields for registration" });
     }
 
     const news = await createNewsService({
@@ -36,7 +38,7 @@ const createNews = async (req, res) => {
 
     res.status(201).json({ message: "News created successfully!", news });
   } catch (error) {
-    res.status(400).json(error);
+    return res.status(400).json(error);
   }
 };
 
