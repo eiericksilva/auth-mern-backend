@@ -270,11 +270,14 @@ const deleteComment = async (req, res) => {
     const commentFinder = commentDeleted.comments.find(
       (comment) => comment.commentId === commentId
     );
-    if (commentFinder.userId !== userId) {
-      return res.status(400).json({ message: "You can't delete this comment" });
+
+    if (String(commentFinder.userData._id) !== String(userId)) {
+      return res.status(403).json({ message: "You can't delete this comment" });
     }
     return res.status(201).json({ message: "Comment successfully removed" });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(400).json(error);
+  }
 };
 
 export default {

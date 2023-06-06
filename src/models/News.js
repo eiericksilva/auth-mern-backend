@@ -5,28 +5,28 @@ const NewsSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      require: true,
+      required: true,
     },
     text: {
       type: String,
-      require: true,
+      required: true,
     },
     banner: {
       type: String,
-      require: true,
+      required: true,
     },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      require: true,
+      required: true,
     },
     likes: {
       type: Array,
-      require: true,
+      required: true,
     },
     comments: {
       type: Array,
-      require: true,
+      required: true,
     },
   },
   { timestamps: true }
