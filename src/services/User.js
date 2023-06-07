@@ -19,3 +19,8 @@ export const getAllUsers = async () => {
   const users = await User.find();
   return users;
 };
+
+export const getUserById = async (id) => {
+  const user = await User.findOne({ _id: id });
+  return user.username;
+};

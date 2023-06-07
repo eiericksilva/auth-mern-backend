@@ -1,5 +1,6 @@
 import News from "../models/News.js";
 import User from "../models/User.js";
+import { getUserById } from "./User.js";
 
 export const createNewsService = async (body) => News.create(body);
 
@@ -43,6 +44,7 @@ export const unlikeNewsService = async (postId, userId) =>
   News.findOneAndUpdate({ _id: postId }, { $pull: { likes: { userId } } });
 
 export const commentNewsService = async (postId, comment, userId) => {
+  const username = await getUserById(userId);
   const commentId = Math.floor(Date.now() * Math.random()).toString(36);
   return News.findOneAndUpdate(
     { _id: postId },
@@ -50,6 +52,7 @@ export const commentNewsService = async (postId, comment, userId) => {
       $push: {
         comments: {
           commentId,
+          username,
           userId,
           comment,
           createdAt: new Date(),
