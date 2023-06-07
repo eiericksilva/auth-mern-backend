@@ -44,15 +44,13 @@ export const unlikeNewsService = async (postId, userId) =>
 
 export const commentNewsService = async (postId, comment, userId) => {
   const commentId = Math.floor(Date.now() * Math.random()).toString(36);
-  const userData = await User.findOne({ _id: userId });
-  console.log("userData:", userData);
   return News.findOneAndUpdate(
     { _id: postId },
     {
       $push: {
         comments: {
           commentId,
-          userData,
+          userId,
           comment,
           createdAt: new Date(),
         },
@@ -62,13 +60,13 @@ export const commentNewsService = async (postId, comment, userId) => {
 };
 
 export const deleteCommentService = async (postId, commentId, userId) => {
-  return News.findByIdAndUpdate(
+  return News.findOneAndUpdate(
     { _id: postId },
     {
       $pull: {
         comments: {
-          commentId: commentId,
-          "userData._id": userId,
+          commentId,
+          userId,
         },
       },
     }

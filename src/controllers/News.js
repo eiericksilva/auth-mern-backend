@@ -90,12 +90,13 @@ const getTopNews = async (req, res) => {
 
     res.status(200).json({
       postId: topNews._id,
+      userId: topNews.user._id,
+      username: topNews.user.username,
       title: topNews.title,
       text: topNews.text,
       banner: topNews.banner,
       likes: topNews.likes,
       comments: topNews.comments,
-      username: topNews.user.username,
     });
   } catch (error) {
     console.log(error);
@@ -113,12 +114,13 @@ const findNewsById = async (req, res) => {
     return res.status(200).json({
       news: {
         postId: news._id,
+        userId: news.user._id,
+        username: news.user.username,
         title: news.title,
         text: news.text,
         banner: news.banner,
         likes: news.likes,
         comments: news.comments,
-        username: news.user.username,
       },
     });
   } catch (error) {
@@ -140,12 +142,13 @@ const searchNewsByTitle = async (req, res) => {
     return res.status(200).json({
       results: news.map((item) => ({
         postId: item._id,
+        userId: item.user._id,
+        username: item.user.username,
         title: item.title,
         text: item.text,
         banner: item.banner,
         likes: item.likes,
         comments: item.comments,
-        username: item.user.username,
       })),
     });
   } catch (error) {
@@ -161,12 +164,13 @@ const getNewsByUser = async (req, res) => {
     return res.status(200).json({
       results: news.map((item) => ({
         postId: item._id,
+        userId: item.user._id,
+        username: item.user.username,
         title: item.title,
         text: item.text,
         banner: item.banner,
         likes: item.likes,
         comments: item.comments,
-        username: item.user.username,
       })),
     });
   } catch (error) {
@@ -261,18 +265,14 @@ const deleteComment = async (req, res) => {
     const { postId, commentId } = req.params;
     const userId = req.currentUser.id;
 
-    const commentDeleted = await deleteCommentService(
-      postId,
-      commentId,
-      userId
-    );
+    const postTarget = await deleteCommentService(postId, commentId, userId);
 
-    const commentFinder = commentDeleted.comments.find(
+    const commentFinder = postTarget.comments.find(
       (comment) => comment.commentId === commentId
     );
 
-    if (String(commentFinder.userData._id) !== String(userId)) {
-      return res.status(403).json({ message: "You can't delete this comment" });
+    if (commentFinder.userId != userId) {
+      return res.status(403).send({ message: "You can't delete this comment" });
     }
     return res.status(201).json({ message: "Comment successfully removed" });
   } catch (error) {
