@@ -40,30 +40,10 @@ const createNews = async (req, res) => {
 };
 
 const findAllNews = async (req, res) => {
-  let { limit, offset } = req.query;
-
-  limit = Number(limit) || 5;
-  offset = Number(offset) || 0;
-
-  const totalNews = await countNewsService();
-  const currentUrl = req.baseUrl;
-
-  const next = offset + limit;
-  const prev = offset - limit;
-
-  const nextUrl =
-    next < totalNews ? `${currentUrl}?limit=${limit}&offset=${next}` : null;
-
-  const prevUrl =
-    prev < totalNews ? `${currentUrl}?limit=${limit}&offset=${prev}` : null;
-
   try {
-    const news = await findAllNewsService(offset, limit);
+    const totalNews = await countNewsService();
+    const news = await findAllNewsService();
     res.status(200).json({
-      nextUrl,
-      prevUrl,
-      limit,
-      offset,
       totalNews,
       results: news.map((item) => ({
         id: item._id,

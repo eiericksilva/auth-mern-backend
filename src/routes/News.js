@@ -15,7 +15,6 @@ NewsRouter.get(
   newsController.getNewsByUser
 );
 NewsRouter.get("/:postId", authenticateMiddleware, newsController.findNewsById);
-
 NewsRouter.patch("/:postId", authenticateMiddleware, newsController.updateNews);
 
 NewsRouter.delete(

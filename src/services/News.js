@@ -4,8 +4,8 @@ import { getUserById } from "./User.js";
 
 export const createNewsService = async (body) => News.create(body);
 
-export const findAllNewsService = async (offset, limit) =>
-  News.find().sort({ _id: -1 }).skip(offset).limit(limit).populate("user");
+export const findAllNewsService = async () =>
+  News.find().sort({ _id: -1 }).populate("user");
 
 export const topNewsService = async () =>
   News.findOne().sort({ _id: -1 }).populate("user");
